@@ -29,12 +29,13 @@ import org.slf4j.LoggerFactory;
  */
 @Component(service = { GrpcPublisherService.class})
 public class GrpcPublishManager implements GrpcPublisherService {
-    private org.onosproject.hierarchicalsyncmaster.service.GrpcClientWorker clientWorker;
+    private GrpcServerWorker serverWorker;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Activate
     protected void activate() {
+        start();
         log.info("Started");
     }
 
@@ -47,24 +48,24 @@ public class GrpcPublishManager implements GrpcPublisherService {
 
     public void start() {
 
-        if (clientWorker != null) {
+        if (serverWorker != null) {
             log.info("Client Grpc has already started");
             return;
         }
 
-        clientWorker = new GrpcClientWorker();
+        serverWorker = new GrpcServerWorker();
 
-        log.info("Client Grpc has started.");
+        log.info("Server Grpc has started.");
     }
 
 
     public void stop() {
-        if (clientWorker != null) {
-            clientWorker.deactivate();
-            clientWorker = null;
+        if (serverWorker != null) {
+            serverWorker.deactivate();
+            serverWorker = null;
         }
 
-        log.info("Client Grpc has Stopped");
+        log.info("Server Grpc has Stopped");
     }
 
 
@@ -75,6 +76,6 @@ public class GrpcPublishManager implements GrpcPublisherService {
 
     @Override
     public Hierarchical.Response send(Hierarchical.Request record) {
-        return clientWorker.sendOverGrpc(record);
+        return null;
     }
 }
