@@ -52,7 +52,6 @@ public class GrpcServerWorker {
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
             Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse(request.getType()).build();
-            log.info("RECEIVEEEEEEEEEEEEEEEEEEED: Type: "+ request.getType() + "\nObject: "+ request.getRequest().toString());
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
