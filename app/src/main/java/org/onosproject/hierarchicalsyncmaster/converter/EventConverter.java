@@ -33,4 +33,5 @@ public interface EventConverter {
      * @return converted data in protobuf format as a byte array.
      */
     byte[] convertToProtoMessage(Event<?, ?> event);
+    Event<?, ?> convertToEvent(byte[] event);
 }

@@ -19,6 +19,7 @@ import com.google.protobuf.ByteString;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.cluster.LeadershipService;
 import org.onosproject.cluster.NodeId;
+import org.onosproject.hierarchicalsyncmaster.api.EventConversionService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcEventStorageService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcPublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
@@ -47,7 +48,7 @@ public class EventPublisher {
     protected GrpcEventStorageService grpcEventStorageService;
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
-    protected GrpcPublisherService grpcPublisherService;
+    protected EventConversionService eventConversionService;
 
     protected ScheduledExecutorService exService;
 
@@ -56,14 +57,14 @@ public class EventPublisher {
     // Thread Scheduler Parameters
     private final long delay = 0;
     private final long period = 1;
-    private final String contantion = "PUBLISHER";
+    private final String contention = "PUBLISHER_MASTER";
 
     private EventCollector eventCollector;
 
     @Activate
     protected void activate() {
 
-        leadershipService.runForLeadership(contantion);
+        leadershipService.runForLeadership(contention);
 
         localNodeId = clusterService.getLocalNode().id();
 
@@ -80,11 +81,13 @@ public class EventPublisher {
 
     @Deactivate
     protected void deactivate() {
+        leadershipService.withdraw(contention);
         stopCollector();
         log.info("Stopped");
     }
 
     private void stopCollector() {
+        //TODO: Understand if it stop gracefully or not.
         exService.shutdown();
     }
 
@@ -94,18 +97,18 @@ public class EventPublisher {
         public void run() {
 
             // do not allow to proceed without leadership
-            NodeId leaderNodeId = leadershipService.getLeader(contantion);
+            NodeId leaderNodeId = leadershipService.getLeader(contention);
             if (!Objects.equals(localNodeId, leaderNodeId)) {
                 log.debug("Not a Leader so cannot consume event");
                 return;
             }
             try {
                 OnosEvent onosEvent = grpcEventStorageService.consumeEvent();
-
                 if (onosEvent != null) {
-                    grpcPublisherService.send(Hierarchical.Request.newBuilder().
-                            setType(onosEvent.type().toString()).
-                            setRequest(ByteString.copyFrom(onosEvent.subject())).build());
+                    //eventConversionService.inverseEvent()
+                    //grpcPublisherService.send(Hierarchical.Request.newBuilder().
+                    //        setType(onosEvent.type().toString()).
+                    //        setRequest(ByteString.copyFrom(onosEvent.subject())).build());
                     log.info("Event Type - {}, Subject {} sent successfully.",
                              onosEvent.type(), onosEvent.subject());
                 }

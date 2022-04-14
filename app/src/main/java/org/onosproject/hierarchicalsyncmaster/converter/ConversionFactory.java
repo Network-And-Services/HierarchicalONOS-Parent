@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 package org.onosproject.hierarchicalsyncmaster.converter;
-import static org.onosproject.hierarchicalsyncmaster.converter.OnosEvent.Type.DEVICE;
-import static org.onosproject.hierarchicalsyncmaster.converter.OnosEvent.Type.LINK;
+import static org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent.Type.DEVICE;
+import static org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent.Type.LINK;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onosproject.hierarchicalsyncmaster.converter.OnosEvent.Type;
+import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent.Type;
 
 
 

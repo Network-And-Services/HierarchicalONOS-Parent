@@ -25,4 +25,5 @@ import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
  */
 public interface EventConversionService {
     OnosEvent convertEvent(Event<?, ?> event);
+    Event<?, ?> inverseEvent(OnosEvent event);
 }

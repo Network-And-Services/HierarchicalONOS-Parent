@@ -16,19 +16,27 @@
 
 package org.onosproject.hierarchicalsyncmaster.service;
 
+import org.onosproject.hierarchicalsyncmaster.api.EventConversionService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcPublisherService;
 import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical;
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a Kafka Producer.
  */
-@Component(service = { GrpcPublisherService.class})
+//TODO: Remove immediate once you will invoke the service from other classes
+@Component(immediate = true, service = {GrpcPublisherService.class})
 public class GrpcPublishManager implements GrpcPublisherService {
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected EventConversionService eventConversionService;
+
     private GrpcServerWorker serverWorker;
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -49,11 +57,11 @@ public class GrpcPublishManager implements GrpcPublisherService {
     public void start() {
 
         if (serverWorker != null) {
-            log.info("Client Grpc has already started");
+            log.info("Server Grpc has already started");
             return;
         }
 
-        serverWorker = new GrpcServerWorker();
+        serverWorker = new GrpcServerWorker(eventConversionService);
 
         log.info("Server Grpc has started.");
     }
@@ -78,4 +86,5 @@ public class GrpcPublishManager implements GrpcPublisherService {
     public Hierarchical.Response send(Hierarchical.Request record) {
         return null;
     }
+
 }

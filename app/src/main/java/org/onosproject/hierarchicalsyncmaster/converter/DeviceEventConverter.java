@@ -17,21 +17,29 @@ package org.onosproject.hierarchicalsyncmaster.converter;
 
 import com.google.protobuf.GeneratedMessageV3;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.onlab.packet.ChassisId;
 import org.onosproject.event.Event;
 import org.onosproject.grpc.net.device.models.DeviceEnumsProto.DeviceEventTypeProto;
 import org.onosproject.grpc.net.device.models.DeviceEnumsProto.DeviceTypeProto;
+import org.onosproject.grpc.net.device.models.DeviceEventProto;
 import org.onosproject.grpc.net.device.models.DeviceEventProto.DeviceNotificationProto;
 import org.onosproject.grpc.net.device.models.PortEnumsProto;
 import org.onosproject.grpc.net.models.DeviceProtoOuterClass.DeviceProto;
-import org.onosproject.grpc.net.models.PortProtoOuterClass;
+import org.onosproject.grpc.net.models.PortProtoOuterClass.PortProto;
 import org.onosproject.incubator.protobuf.models.net.AnnotationsTranslator;
-import org.onosproject.net.Device;
+import org.onosproject.incubator.protobuf.models.net.device.DeviceProtoTranslator;
+import org.onosproject.incubator.protobuf.models.net.device.PortProtoTranslator;
+import org.onosproject.net.*;
 import org.onosproject.net.device.DefaultDeviceDescription;
+import org.onosproject.net.device.DefaultPortDescription;
 import org.onosproject.net.device.DeviceEvent;
+import org.onosproject.net.device.DeviceProviderService;
+import org.onosproject.net.link.LinkProviderService;
+import org.onosproject.net.provider.ProviderId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import static com.google.common.base.Strings.nullToEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -77,7 +85,6 @@ public class DeviceEventConverter implements EventConverter {
     private DeviceNotificationProto buildDeviceProtoMessage(DeviceEvent deviceEvent) {
         DeviceNotificationProto.Builder notificationBuilder =
                 DeviceNotificationProto.newBuilder();
-
         DeviceProto deviceCore =
                 DeviceProto.newBuilder()
                         .setChassisId(deviceEvent.subject().chassisId().id()
@@ -92,10 +99,10 @@ public class DeviceEventConverter implements EventConverter {
                         .putAllAnnotations(AnnotationsTranslator.asMap(deviceEvent.subject().annotations()))
                         .build();
 
-        PortProtoOuterClass.PortProto portProto = null;
+        PortProto portProto = null;
         if (deviceEvent.port() != null) {
             portProto =
-                    PortProtoOuterClass.PortProto.newBuilder()
+                    PortProto.newBuilder()
                             .setIsEnabled(deviceEvent.port().isEnabled())
                             .setPortNumber(deviceEvent.port().number()
                                                    .toString())
@@ -130,23 +137,62 @@ public class DeviceEventConverter implements EventConverter {
         return protobufEventType;
     }
 
-    private DeviceEvent getEvent(DeviceNotificationProto deviceNotificationProto){
-        //deviceProviderService.deviceConnected();
-        DeviceProto deviceProto = deviceNotificationProto.getDevice();
-        String hwVersion = deviceProto.getHwVersion();
-        Device.Type type = Device.Type.valueOf(deviceProto.getType().toString());
-        String swVersion = deviceProto.getSwVersion();
-        String manufacturer = deviceProto.getManufacturer();
-        String serialNumber = deviceProto.getSerialNumber();
-        ChassisId chassisId = new ChassisId(deviceProto.getChassisId());
-        Map<String, String> annotationsMap = deviceProto.getAnnotationsMap();
-        URI uri = null;
+    private DefaultDeviceDescription getDeviceFromProto(DeviceProto deviceProto){
+        DefaultDeviceDescription defaultDeviceDescription =
+                new DefaultDeviceDescription(URI.create(deviceProto.getDeviceId()),
+                        Device.Type.valueOf(deviceProto.getType().name()),
+                        deviceProto.getManufacturer(), deviceProto.getHwVersion(),
+                        deviceProto.getSwVersion(), deviceProto.getSerialNumber(),
+                        new ChassisId(deviceProto.getChassisId()), AnnotationsTranslator.asAnnotations(deviceProto.getAnnotationsMap()));
+        /*
+        DefaultDevice device =
+                new DefaultDevice(new ProviderId("Test", "test"), DeviceId.deviceId(deviceProto.getDeviceId()),
+                        DeviceProtoTranslator.translate(deviceProto.getType()),
+                        deviceProto.getManufacturer(), deviceProto.getHwVersion(),
+                        deviceProto.getSwVersion(), deviceProto.getSerialNumber(),
+                        new ChassisId(deviceProto.getChassisId()), AnnotationsTranslator.asAnnotations(deviceProto.getAnnotationsMap()));
+
+         */
+        log.info("Correctly converted proto of Device " + defaultDeviceDescription);
+        return defaultDeviceDescription;
+    }
+
+    private DefaultPortDescription getPortFromProto(PortProto portProto){
+        if (!nullToEmpty(portProto.getPortNumber()).isEmpty()){
+            DefaultPortDescription defaultPortDescription = DefaultPortDescription.builder()
+                    .withPortNumber(PortNumber.fromString(portProto.getPortNumber()))
+                    .isEnabled(portProto.getIsEnabled())
+                    .type(Port.Type.valueOf(portProto.getType().name()))
+                    .portSpeed(portProto.getPortSpeed())
+                    .annotations(AnnotationsTranslator.asAnnotations(portProto.getAnnotationsMap())).build();
+            /*
+            DefaultPort port = new DefaultPort(device,
+                    PortNumber.fromString(portProto.getPortNumber()),
+                    portProto.getIsEnabled(),
+                    Port.Type.valueOf(portProto.getType().name()),
+                    portProto.getPortSpeed(), AnnotationsTranslator.asAnnotations(portProto.getAnnotationsMap()));
+
+             */
+            log.info("Correctly converted proto of Port " + defaultPortDescription);
+            return defaultPortDescription;
+        }
+        return null;
+    }
+
+    @Override
+    public Event<?, ?> convertToEvent(byte[] event) {
+        DeviceEventProto.DeviceNotificationProto deviceNotificationProto;
         try {
-            uri = new URI(serialNumber);
-        } catch (URISyntaxException e) {
+            deviceNotificationProto = DeviceEventProto.DeviceNotificationProto.parseFrom(event);
+            log.info("Received Update --> Type: " + deviceNotificationProto.getDeviceEventType()
+                    + " Device: " + deviceNotificationProto.getDevice().getDeviceId());
+            DefaultDeviceDescription deviceDescription = getDeviceFromProto(deviceNotificationProto.getDevice());
+            DefaultPortDescription portDescription = getPortFromProto(deviceNotificationProto.getPort());
+            //TODO: SEND THIS EVENT TO THE SERVICE THAT WILL HAVE THE DEVICE/LINK PROVIDER WITHIN
+            //return new DeviceEvent(DeviceEvent.Type.valueOf(deviceNotificationProto.getDeviceEventType().toString()), device, port);
+        } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
         }
-        DefaultDeviceDescription deviceDescription = new DefaultDeviceDescription(uri, type, manufacturer, hwVersion, swVersion, serialNumber, chassisId);
         return null;
     }
 }

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 
 @Component(service = GrpcEventStorageService.class)
 public class GrpcStorageManager implements GrpcEventStorageService {
@@ -37,7 +38,7 @@ public class GrpcStorageManager implements GrpcEventStorageService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private static final String GRPC_WORK_QUEUE = "Grpc-Work-Queue";
+    private static final String GRPC_WORK_QUEUE = "GRPC_WORK_QUEUE_MASTER";
 
     private WorkQueue<OnosEvent> queue;
 
@@ -47,7 +48,6 @@ public class GrpcStorageManager implements GrpcEventStorageService {
                                                        Serializer.using(KryoNamespaces.API,
                                                                         OnosEvent.class,
                                                                         OnosEvent.Type.class));
-
         log.info("Started");
     }
 
@@ -85,5 +85,4 @@ public class GrpcStorageManager implements GrpcEventStorageService {
 
         return null;
     }
-
 }

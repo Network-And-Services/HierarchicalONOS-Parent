@@ -16,16 +16,31 @@
 package org.onosproject.hierarchicalsyncmaster.converter;
 
 import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.onosproject.event.Event;
 import org.onosproject.grpc.net.link.models.LinkEnumsProto.LinkEventTypeProto;
 import org.onosproject.grpc.net.link.models.LinkEnumsProto.LinkStateProto;
 import org.onosproject.grpc.net.link.models.LinkEnumsProto.LinkTypeProto;
+import org.onosproject.grpc.net.link.models.LinkEventProto;
 import org.onosproject.grpc.net.link.models.LinkEventProto.LinkNotificationProto;
 import org.onosproject.grpc.net.models.ConnectPointProtoOuterClass.ConnectPointProto;
 import org.onosproject.grpc.net.models.LinkProtoOuterClass.LinkProto;
+import org.onosproject.grpc.net.models.PortProtoOuterClass;
+import org.onosproject.incubator.protobuf.models.net.AnnotationsTranslator;
+import org.onosproject.incubator.protobuf.models.net.ConnectPointProtoTranslator;
+import org.onosproject.incubator.protobuf.models.net.LinkProtoTranslator;
+import org.onosproject.net.DefaultLink;
+import org.onosproject.net.Link;
+import org.onosproject.net.Port;
+import org.onosproject.net.PortNumber;
+import org.onosproject.net.device.DefaultPortDescription;
+import org.onosproject.net.link.DefaultLinkDescription;
 import org.onosproject.net.link.LinkEvent;
+import org.onosproject.net.provider.ProviderId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.google.common.base.Strings.nullToEmpty;
 
 /**
  * Converts for ONOS Link event message to protobuf format.
@@ -97,5 +112,43 @@ public class LinkEventConverter implements EventConverter {
         }
 
         return generatedEventType;
+    }
+
+    private DefaultLinkDescription getLinkDescriptionFromProto(LinkProto linkProto) {
+        DefaultLinkDescription defaultLinkDescription =
+                new DefaultLinkDescription(ConnectPointProtoTranslator.translate(linkProto.getSrc()).get(),
+                        ConnectPointProtoTranslator.translate(linkProto.getDst()).get(),
+                        Link.Type.valueOf(linkProto.getType().name()),
+                        linkProto.getIsExpected(),
+                        AnnotationsTranslator.asAnnotations(linkProto.getAnnotationsMap()));
+        /*
+        DefaultLink link = DefaultLink.builder().providerId(ProviderId.NONE).
+                src(ConnectPointProtoTranslator.translate(linkProto.getSrc()).get()).
+                dst(ConnectPointProtoTranslator.translate(linkProto.getDst()).get()).
+                type(Link.Type.valueOf(linkProto.getType().name())).
+                state(Link.State.valueOf(linkProto.getState().name())).
+                annotations(AnnotationsTranslator.asAnnotations(linkProto.getAnnotationsMap())).build();
+
+         */
+        log.info("Correctly converted proto of Link "+ defaultLinkDescription);
+        return defaultLinkDescription;
+    }
+
+    @Override
+    public Event<?, ?> convertToEvent(byte[] event) {
+        LinkEventProto.LinkNotificationProto linkNotificationProto;
+        try {
+            linkNotificationProto = LinkNotificationProto.parseFrom(event);
+            log.info("Received Update --> Type: " + linkNotificationProto.getLinkEventType()
+                    + " Link: " + linkNotificationProto.getLink());
+            DefaultLinkDescription defaultLinkDescriptionProto = getLinkDescriptionFromProto(linkNotificationProto.getLink());
+            //TODO: SEND THIS EVENT TO THE SERVICE THAT WILL HAVE THE DEVICE/LINK PROVIDER WITHIN
+            //return new LinkEvent(LinkEvent.Type.valueOf(linkNotificationProto.getLinkEventType().toString()), link);
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            log.error(e.toString());
+        }
+        return null;
     }
 }
