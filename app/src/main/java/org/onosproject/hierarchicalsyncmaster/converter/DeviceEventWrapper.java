@@ -44,6 +44,8 @@ public class DeviceEventWrapper extends EventWrapper {
             }
         } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 
