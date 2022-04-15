@@ -16,14 +16,11 @@
 
 package org.onosproject.hierarchicalsyncmaster.impl;
 
-import org.onosproject.event.Event;
 import org.onosproject.hierarchicalsyncmaster.api.EventConversionService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
-import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventConverter;
-import org.onosproject.hierarchicalsyncmaster.converter.EventConverter;
-import org.onosproject.hierarchicalsyncmaster.converter.LinkEventConverter;
-import org.onosproject.net.device.DeviceEvent;
-import org.onosproject.net.link.LinkEvent;
+import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
+import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
+import org.onosproject.hierarchicalsyncmaster.converter.LinkEventWrapper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -40,14 +37,9 @@ import static org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent.Type.*;
 public class EventConversionManager implements EventConversionService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    private EventConverter deviceEventConverter;
-    private EventConverter linkEventConverter;
 
     @Activate
     protected void activate() {
-        deviceEventConverter = new DeviceEventConverter();
-        linkEventConverter = new LinkEventConverter();
-
         log.info("Started!");
     }
 
@@ -57,22 +49,11 @@ public class EventConversionManager implements EventConversionService {
     }
 
     @Override
-    public OnosEvent convertEvent(Event<?, ?> event) {
-        if (event instanceof DeviceEvent) {
-            return new OnosEvent(DEVICE, deviceEventConverter.convertToProtoMessage(event));
-        } else if (event instanceof LinkEvent) {
-            return new OnosEvent(LINK, linkEventConverter.convertToProtoMessage(event));
-        } else {
-            throw new IllegalArgumentException("Unsupported event type");
-        }
-    }
-
-    @Override
-    public Event<?, ?> inverseEvent(OnosEvent event) {
-        if (event.type().equals(DEVICE)){
-            return deviceEventConverter.convertToEvent(event.subject());
-        } else if (event.type().equals(LINK)) {
-            return linkEventConverter.convertToEvent(event.subject());
+    public EventWrapper convertEvent(OnosEvent onosEvent) {
+        if (onosEvent.type().equals(DEVICE)) {
+            return new DeviceEventWrapper(onosEvent);
+        } else if (onosEvent.type().equals(LINK)) {
+            return new LinkEventWrapper(onosEvent);
         } else {
             throw new IllegalArgumentException("Unsupported event type");
         }

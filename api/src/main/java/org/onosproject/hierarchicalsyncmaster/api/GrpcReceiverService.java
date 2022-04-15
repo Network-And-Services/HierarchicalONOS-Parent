@@ -15,12 +15,8 @@
  */
 package org.onosproject.hierarchicalsyncmaster.api;
 
-import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical.Response;
 import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical.Request;
 
-import java.util.concurrent.Future;
-
-public interface GrpcPublisherService {
-
-    Response send(Request record);
+public interface GrpcReceiverService {
+    void receive(Request record);
 }

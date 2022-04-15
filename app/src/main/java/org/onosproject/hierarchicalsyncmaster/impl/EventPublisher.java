@@ -15,15 +15,12 @@
  */
 package org.onosproject.hierarchicalsyncmaster.impl;
 
-import com.google.protobuf.ByteString;
 import org.onosproject.cluster.ClusterService;
 import org.onosproject.cluster.LeadershipService;
 import org.onosproject.cluster.NodeId;
 import org.onosproject.hierarchicalsyncmaster.api.EventConversionService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcEventStorageService;
-import org.onosproject.hierarchicalsyncmaster.api.GrpcPublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
-import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,11 +102,9 @@ public class EventPublisher {
             try {
                 OnosEvent onosEvent = grpcEventStorageService.consumeEvent();
                 if (onosEvent != null) {
-                    //eventConversionService.inverseEvent()
-                    //grpcPublisherService.send(Hierarchical.Request.newBuilder().
-                    //        setType(onosEvent.type().toString()).
-                    //        setRequest(ByteString.copyFrom(onosEvent.subject())).build());
-                    log.info("Event Type - {}, Subject {} sent successfully.",
+                    eventConversionService.convertEvent(onosEvent);
+                    //TODO: SEND EVENT TO THE CLASS THAT LOAD THEM INTO THE PROVIDER
+                    log.debug("Event Type - {}, Subject {} sent successfully.",
                              onosEvent.type(), onosEvent.subject());
                 }
             } catch (Exception e1) {

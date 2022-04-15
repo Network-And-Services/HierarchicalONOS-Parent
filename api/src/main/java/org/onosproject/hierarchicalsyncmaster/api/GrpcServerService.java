@@ -13,19 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.hierarchicalsyncmaster.errors;
+package org.onosproject.hierarchicalsyncmaster.api;
 
-/**
- * Represents that an unregistered application trying to subscribe to ONOS
- * events.
- *
- */
-public class InvalidApplicationException extends RuntimeException {
+import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical.Request;
 
-    private static final long serialVersionUID = 1L;
+public interface GrpcServerService {
 
-    public InvalidApplicationException(String message) {
-        super(message);
-    }
-
+    void start();
+    void stop();
+    void restart();
 }

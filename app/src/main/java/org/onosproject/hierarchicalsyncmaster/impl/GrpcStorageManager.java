@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 
 @Component(service = GrpcEventStorageService.class)
 public class GrpcStorageManager implements GrpcEventStorageService {
