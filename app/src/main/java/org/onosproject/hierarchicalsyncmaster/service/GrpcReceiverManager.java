@@ -62,9 +62,6 @@ public class GrpcReceiverManager implements GrpcReceiverService {
     }
 
     private class HierarchicalSyncServer extends HierarchicalServiceGrpc.HierarchicalServiceImplBase {
-
-        private final Logger log = LoggerFactory.getLogger(getClass());
-
         @Override
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {

@@ -19,7 +19,16 @@ public class GrpcServerWorker implements GrpcServerService {
     @Override
     public void start(HierarchicalServiceGrpc.HierarchicalServiceImplBase implBase) {
         this.implBase = implBase;
-        createServer();
+        try {
+            server = NettyServerBuilder.forPort(5908)
+                    .addService(implBase)
+                    .build()
+                    .start();
+        } catch (IOException e) {
+            log.error("Unable to start gRPC server", e);
+            throw new IllegalStateException("Unable to start gRPC server", e);
+        }
+        log.info("Started");
     }
 
     @Override
@@ -40,21 +49,5 @@ public class GrpcServerWorker implements GrpcServerService {
     public boolean isRunning() {
         return !server.isTerminated() && !server.isShutdown();
     }
-
-    private void createServer(){
-        try {
-            server = NettyServerBuilder.forPort(5908)
-                    .addService(implBase)
-                    .build()
-                    .start();
-        } catch (IOException e) {
-            log.error("Unable to start gRPC server", e);
-            throw new IllegalStateException("Unable to start gRPC server", e);
-        } catch (Exception e){
-            log.error("PROBLEMAAAAAAA: "+ e);
-        }
-
-        log.info("Started");
-        }
 
 }
