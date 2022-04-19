@@ -93,13 +93,7 @@ public class GrpcStorageManager implements GrpcEventStorageService {
         log.debug("Published {} Event to Distributed Work Queue", e.type());
     }
 
-    @Override
-    public OnosEvent consumeEvent() {
-        return null;
-    }
-
     private class InternalLeadershipListener implements LeadershipEventListener {
-
         @Override
         public void event(LeadershipEvent event) {
             if(event.subject().topic().equals(contention)){
