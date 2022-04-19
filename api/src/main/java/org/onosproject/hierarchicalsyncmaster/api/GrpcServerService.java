@@ -15,11 +15,11 @@
  */
 package org.onosproject.hierarchicalsyncmaster.api;
 
-import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical.Request;
+import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
 
 public interface GrpcServerService {
-
-    void start();
+    void start(HierarchicalServiceGrpc.HierarchicalServiceImplBase implBase);
     void stop();
     void restart();
+    boolean isRunning();
 }
