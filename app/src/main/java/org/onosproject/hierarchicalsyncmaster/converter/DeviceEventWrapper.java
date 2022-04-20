@@ -32,19 +32,17 @@ public class DeviceEventWrapper extends EventWrapper {
                 log.debug("Received Update --> Type: " + deviceNotificationProto.getDeviceEventType()
                         + " Device: " + deviceNotificationProto.getDevice().getDeviceId());
                 eventTypeName = myEventTypeName;
+                deviceId = DeviceId.deviceId(deviceNotificationProto.getDevice().getDeviceId());
                 if (nullToEmpty(deviceNotificationProto.getPort().getPortNumber()).isEmpty()) {
                     description = getDeviceFromProto(deviceNotificationProto.getDevice());
                 } else {
                     description = getPortFromProto(deviceNotificationProto.getPort());
-                    deviceId = DeviceId.deviceId(deviceNotificationProto.getDevice().getDeviceId());
                 }
             } else {
                 log.error("Unsupported Onos Device Event {}. There is no matching"
                         + "proto Device Event type", myEventTypeName);
             }
         } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        } catch (Exception e){
             e.printStackTrace();
         }
     }
