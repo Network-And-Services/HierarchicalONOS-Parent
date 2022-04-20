@@ -18,6 +18,8 @@ package org.onosproject.hierarchicalsyncmaster.impl;
 import org.onosproject.cluster.*;
 import org.onosproject.hierarchicalsyncmaster.api.EventConversionService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcEventStorageService;
+import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
+import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
 import org.onosproject.store.serializers.KryoNamespaces;
 import org.onosproject.store.service.Serializer;
@@ -44,6 +46,9 @@ public class GrpcStorageManager implements GrpcEventStorageService {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected EventConversionService eventConversionService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected PublisherService publisherService;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private final LeadershipEventListener leadershipListener = new InternalLeadershipListener();
@@ -113,8 +118,13 @@ public class GrpcStorageManager implements GrpcEventStorageService {
 
     public void sendEvent(OnosEvent onosEvent){
         if (onosEvent != null) {
-            eventConversionService.convertEvent(onosEvent);
-            //TODO: SEND EVENT TO THE CLASS THAT LOAD THEM INTO THE PROVIDER
+            EventWrapper wrapper = eventConversionService.convertEvent(onosEvent);
+            //TODO: check if the wrapper returns null because of conversion
+            if (onosEvent.type().equals(OnosEvent.Type.DEVICE)){
+                publisherService.newDeviceTopologyEvent(wrapper);
+            } else {
+                publisherService.newLinkTopologyEvent(wrapper);
+            }
             log.debug("Event Type - {}, Subject {} sent successfully.",
                      onosEvent.type(), onosEvent.subject());
         }
