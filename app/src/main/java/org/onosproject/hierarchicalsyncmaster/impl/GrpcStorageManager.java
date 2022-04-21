@@ -77,6 +77,8 @@ public class GrpcStorageManager implements GrpcEventStorageService {
         log.info("Starting tasker");
     }
 
+
+
     public void stopTasker(){
         queue.stopProcessing();
         log.info("Stopping tasker");
@@ -121,12 +123,21 @@ public class GrpcStorageManager implements GrpcEventStorageService {
             EventWrapper wrapper = eventConversionService.convertEvent(onosEvent);
             //TODO: check if the wrapper returns null because of conversion
             if (onosEvent.type().equals(OnosEvent.Type.DEVICE)){
-                publisherService.newDeviceTopologyEvent(wrapper);
+                if(publisherService.newDeviceTopologyEvent(wrapper)){
+                    log.debug("Event Type - {}, Subject {} sent successfully.",
+                            onosEvent.type(), onosEvent.subject());
+                    return;
+                }
             } else {
-                publisherService.newLinkTopologyEvent(wrapper);
+                if(publisherService.newLinkTopologyEvent(wrapper)){
+                    log.debug("Event Type - {}, Subject {} sent successfully.",
+                            onosEvent.type(), onosEvent.subject());
+                    return;
+                }
             }
-            log.debug("Event Type - {}, Subject {} sent successfully.",
-                     onosEvent.type(), onosEvent.subject());
+            queue.addOne(onosEvent);
+            log.error("Event Type - {}, Subject {} reappended to queue.",
+                    onosEvent.type(), onosEvent.subject());
         }
     }
 }

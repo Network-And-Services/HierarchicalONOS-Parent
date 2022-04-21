@@ -3,6 +3,7 @@ package org.onosproject.hierarchicalsyncmaster.impl;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
+import org.onosproject.net.ConnectPoint;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
 import org.onosproject.net.PortNumber;
@@ -13,21 +14,27 @@ import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component(immediate = true, service = PublisherService.class)
 public class EventPublisher implements PublisherService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected DeviceProviderService deviceProviderService;
-    protected LinkProviderService linkProviderService;
+    private final ProviderId providerId = new ProviderId("vr", "org.onosproject.hierarchical-sync-master");
+
+    private DeviceProviderService deviceProviderService;
+    private LinkProviderService linkProviderService;
     private DeviceProvider deviceProvider = new DeviceLocalProvider();
     private LinkProvider linkProvider = new LinkLocalProvider();
-
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceProviderRegistry deviceProviderRegistry;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected DeviceAdminService deviceAdminService;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected LinkProviderRegistry linkProviderRegistry;
 
@@ -45,58 +52,60 @@ public class EventPublisher implements PublisherService {
         log.info("Stopped");
     }
 
+    public boolean checkPortsExistence(LinkDescription linkDescription){
+        return (deviceAdminService.getPort(linkDescription.src().deviceId(), linkDescription.src().port()) != null) && (deviceAdminService.getPort(linkDescription.dst()) != null);
+    }
+
+    public boolean checkDeviceExistence(DeviceId deviceId){
+        return deviceAdminService.getDevice(deviceId) != null;
+    }
+
     @Override
-    public void newDeviceTopologyEvent(EventWrapper deviceEventWrapper) {
+    public boolean newDeviceTopologyEvent(EventWrapper deviceEventWrapper) {
         DeviceEventWrapper device = (DeviceEventWrapper) deviceEventWrapper;
         if(device.description instanceof DeviceDescription){
             DeviceDescription descriptor = (DeviceDescription) device.description;
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case DEVICE_ADDED:
-                    deviceProviderService.deviceConnected(device.deviceId,descriptor);
-                    break;
-                case DEVICE_REMOVED:
-                    deviceProviderService.deviceDisconnected(device.deviceId);
-                    break;
                 case DEVICE_UPDATED:
-                    deviceProviderService.deviceConnected(device.deviceId,descriptor);
-                    break;
                 case DEVICE_AVAILABILITY_CHANGED:
                     deviceProviderService.deviceConnected(device.deviceId,descriptor);
                     break;
+                case DEVICE_REMOVED:
+                    deviceAdminService.removeDevice(device.deviceId);
+                    break;
             }
-
         } else{
             PortDescription descriptor = (PortDescription) device.description;
-            List<PortDescription> descPorts = Arrays.asList(descriptor);
+            List<PortDescription> descPorts = List.of(descriptor);
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case PORT_ADDED:
-                    deviceProviderService.updatePorts(device.deviceId,descPorts);
+                case PORT_UPDATED:
+                    if (!checkDeviceExistence(device.deviceId)){ return false;}
+                    deviceProviderService.portStatusChanged(device.deviceId,descriptor);
                     break;
                 case PORT_REMOVED:
-                    deviceProviderService.deletePort(device.deviceId,descPorts.get(1));
-                    break;
-                case PORT_UPDATED:
-                    deviceProviderService.updatePorts(device.deviceId,descPorts);
+                    deviceProviderService.deletePort(device.deviceId,descPorts.get(0));
                     break;
             }
         }
-
+        return true;
     }
 
     @Override
-    public void newLinkTopologyEvent(EventWrapper deviceEventWrapper) {
+    public boolean newLinkTopologyEvent(EventWrapper deviceEventWrapper) {
         LinkDescription descriptor = (LinkDescription) deviceEventWrapper.description;
         switch(LinkEvent.Type.valueOf(deviceEventWrapper.eventTypeName)) {
             case LINK_ADDED:
+            case LINK_UPDATED:
+                if(!checkPortsExistence(descriptor)){ return false;}
                 linkProviderService.linkDetected(descriptor);
                 break;
             case LINK_REMOVED:
                 linkProviderService.linkVanished(descriptor);
                 break;
-            case LINK_UPDATED:
-                linkProviderService.linkDetected(descriptor);
-                break;
         }
+        return true;
     }
 
     private class DeviceLocalProvider implements DeviceProvider{
@@ -115,16 +124,31 @@ public class EventPublisher implements PublisherService {
 
         @Override
         public boolean isAvailable(DeviceId deviceId) {
-            return isReachable(deviceId);
+            return true;
         }
 
         @Override
         public void changePortState(DeviceId deviceId, PortNumber portNumber, boolean enable) {
+
+        }
+
+        @Override
+        public void triggerDisconnect(DeviceId deviceId) {
+        }
+
+        @Override
+        public CompletableFuture<Boolean> probeReachability(DeviceId deviceId) {
+            return CompletableFuture.completedFuture(true);
+        }
+
+        @Override
+        public int gracePeriod() {
+            return DeviceProvider.super.gracePeriod();
         }
 
         @Override
         public ProviderId id() {
-            return ProviderId.NONE;
+            return providerId;
         }
     }
 
