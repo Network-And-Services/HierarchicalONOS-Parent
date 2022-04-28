@@ -3,7 +3,6 @@ package org.onosproject.hierarchicalsyncmaster.impl;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
-import org.onosproject.net.ConnectPoint;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
 import org.onosproject.net.PortNumber;
@@ -13,9 +12,6 @@ import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,13 +19,11 @@ import java.util.concurrent.CompletableFuture;
 public class EventPublisher implements PublisherService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
     private final ProviderId providerId = new ProviderId("vr", "org.onosproject.hierarchical-sync-master");
-
     private DeviceProviderService deviceProviderService;
     private LinkProviderService linkProviderService;
-    private DeviceProvider deviceProvider = new DeviceLocalProvider();
-    private LinkProvider linkProvider = new LinkLocalProvider();
+    private final DeviceProvider deviceProvider = new DeviceLocalProvider();
+    private final LinkProvider linkProvider = new LinkLocalProvider();
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceProviderRegistry deviceProviderRegistry;
 
@@ -73,6 +67,8 @@ public class EventPublisher implements PublisherService {
                     break;
                 case DEVICE_REMOVED:
                     deviceAdminService.removeDevice(device.deviceId);
+                    //TODO: we should not vanish the link for the optical part
+                    linkProviderService.linksVanished(device.deviceId);
                     break;
             }
         } else{
@@ -81,7 +77,7 @@ public class EventPublisher implements PublisherService {
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case PORT_ADDED:
                 case PORT_UPDATED:
-                    if (!checkDeviceExistence(device.deviceId)){ return false;}
+                    //if (!checkDeviceExistence(device.deviceId)){ return false;}
                     deviceProviderService.portStatusChanged(device.deviceId,descriptor);
                     break;
                 case PORT_REMOVED:
@@ -98,7 +94,7 @@ public class EventPublisher implements PublisherService {
         switch(LinkEvent.Type.valueOf(deviceEventWrapper.eventTypeName)) {
             case LINK_ADDED:
             case LINK_UPDATED:
-                if(!checkPortsExistence(descriptor)){ return false;}
+                //if(!checkPortsExistence(descriptor)){ return false;}
                 linkProviderService.linkDetected(descriptor);
                 break;
             case LINK_REMOVED:

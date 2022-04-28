@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.URI;
 
-import static com.google.common.base.Strings.nullToEmpty;
-
 public class DeviceEventWrapper extends EventWrapper {
 
     public DeviceId deviceId;
@@ -33,7 +31,7 @@ public class DeviceEventWrapper extends EventWrapper {
                         + " Device: " + deviceNotificationProto.getDevice().getDeviceId());
                 eventTypeName = myEventTypeName;
                 deviceId = DeviceId.deviceId(deviceNotificationProto.getDevice().getDeviceId());
-                if (nullToEmpty(deviceNotificationProto.getPort().getPortNumber()).isEmpty()) {
+                if (eventTypeName.startsWith("DEVICE")) {
                     description = getDeviceFromProto(deviceNotificationProto.getDevice());
                 } else {
                     description = getPortFromProto(deviceNotificationProto.getPort());
@@ -42,8 +40,8 @@ public class DeviceEventWrapper extends EventWrapper {
                 log.error("Unsupported Onos Device Event {}. There is no matching"
                         + "proto Device Event type", myEventTypeName);
             }
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+           log.error("Error while converting Device Event. Exception {}", e.toString());
         }
     }
 
@@ -54,8 +52,8 @@ public class DeviceEventWrapper extends EventWrapper {
                         Device.Type.valueOf(deviceProto.getType().name()),
                         deviceProto.getManufacturer(), deviceProto.getHwVersion(),
                         deviceProto.getSwVersion(), deviceProto.getSerialNumber(),
-                        new ChassisId(deviceProto.getChassisId()), AnnotationsTranslator.asAnnotations(deviceProto.getAnnotationsMap()));
-        log.info("Correctly converted proto of Device " + defaultDeviceDescription);
+                        new ChassisId(Long.parseLong(deviceProto.getChassisId())), AnnotationsTranslator.asAnnotations(deviceProto.getAnnotationsMap()));
+        log.debug("Correctly converted proto of Device " + defaultDeviceDescription);
         return defaultDeviceDescription;
     }
 
@@ -66,7 +64,7 @@ public class DeviceEventWrapper extends EventWrapper {
                 .type(Port.Type.valueOf(portProto.getType().name()))
                 .portSpeed(portProto.getPortSpeed())
                 .annotations(AnnotationsTranslator.asAnnotations(portProto.getAnnotationsMap())).build();
-        log.info("Correctly converted proto of Port " + defaultPortDescription);
+        log.debug("Correctly converted proto of Port " + defaultPortDescription);
         return defaultPortDescription;
     }
 

@@ -42,7 +42,7 @@ public class LinkEventWrapper extends EventWrapper {
             linkNotificationProto = LinkNotificationProto.parseFrom(event.subject());
             String myeventTypeName = linkNotificationProto.getLinkEventType().name();
             if (linkEventTypeSupported(myeventTypeName)){
-                log.debug("Received Update --> Type: " + myeventTypeName
+                log.info("Received Update --> Type: " + myeventTypeName
                         + " Link: " + linkNotificationProto.getLink());
                 eventTypeName = myeventTypeName;
                 description = getLinkDescriptionFromProto(linkNotificationProto.getLink());
@@ -50,8 +50,8 @@ public class LinkEventWrapper extends EventWrapper {
                 log.error("Unsupported Onos Link Event {}. There is no matching"
                         + "proto Link Event type", myeventTypeName);
             }
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Error while converting Link Event. Exception {}", e.toString());
         }
     }
 
@@ -62,7 +62,7 @@ public class LinkEventWrapper extends EventWrapper {
                         Link.Type.valueOf(linkProto.getType().name()),
                         linkProto.getIsExpected(),
                         AnnotationsTranslator.asAnnotations(linkProto.getAnnotationsMap()));
-        log.info("Correctly converted proto of Link "+ defaultLinkDescription);
+        log.debug("Correctly converted proto of Link " + defaultLinkDescription);
         return defaultLinkDescription;
     }
 

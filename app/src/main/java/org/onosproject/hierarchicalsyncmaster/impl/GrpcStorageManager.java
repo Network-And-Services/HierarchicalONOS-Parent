@@ -121,23 +121,25 @@ public class GrpcStorageManager implements GrpcEventStorageService {
     public void sendEvent(OnosEvent onosEvent){
         if (onosEvent != null) {
             EventWrapper wrapper = eventConversionService.convertEvent(onosEvent);
-            //TODO: check if the wrapper returns null because of conversion
-            if (onosEvent.type().equals(OnosEvent.Type.DEVICE)){
-                if(publisherService.newDeviceTopologyEvent(wrapper)){
-                    log.debug("Event Type - {}, Subject {} sent successfully.",
-                            onosEvent.type(), onosEvent.subject());
-                    return;
+            if (wrapper.description != null){
+                //TODO: test if it works
+                if (onosEvent.type().equals(OnosEvent.Type.DEVICE)){
+                    if(publisherService.newDeviceTopologyEvent(wrapper)){
+                        log.debug("Event Type - {}, Subject {} sent successfully.",
+                                onosEvent.type(), onosEvent.subject());
+                        //return;
+                    }
+                } else {
+                    if(publisherService.newLinkTopologyEvent(wrapper)){
+                        log.debug("Event Type - {}, Subject {} sent successfully.",
+                                onosEvent.type(), onosEvent.subject());
+                        //return;
+                    }
                 }
-            } else {
-                if(publisherService.newLinkTopologyEvent(wrapper)){
-                    log.debug("Event Type - {}, Subject {} sent successfully.",
-                            onosEvent.type(), onosEvent.subject());
-                    return;
-                }
+                //queue.addOne(onosEvent);
+                //log.error("Event Type - {}, Subject {} reappended to queue.",
+                //        onosEvent.type(), onosEvent.subject());
             }
-            queue.addOne(onosEvent);
-            log.error("Event Type - {}, Subject {} reappended to queue.",
-                    onosEvent.type(), onosEvent.subject());
         }
     }
 }
