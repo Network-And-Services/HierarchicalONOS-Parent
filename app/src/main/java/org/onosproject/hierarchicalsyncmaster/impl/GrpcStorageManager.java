@@ -46,19 +46,16 @@ public class GrpcStorageManager implements GrpcEventStorageService {
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected EventConversionService eventConversionService;
-
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected PublisherService publisherService;
     private final Logger log = LoggerFactory.getLogger(getClass());
-
     private final LeadershipEventListener leadershipListener = new InternalLeadershipListener();
     private static final String GRPC_WORK_QUEUE = "GRPC_WORK_QUEUE_MASTER";
     private final String contention = "PUBLISHER_MASTER";
     private NodeId localNodeId;
     protected ExecutorService eventExecutor;
-
     private WorkQueue<OnosEvent> queue;
-    private boolean topicLeader;
+    public static boolean topicLeader;
     @Activate
     protected void activate() {
         localNodeId = clusterService.getLocalNode().id();

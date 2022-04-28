@@ -3,6 +3,7 @@ package org.onosproject.hierarchicalsyncmaster.impl;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
+import org.onosproject.mastership.MastershipAdminService;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
 import org.onosproject.net.PortNumber;
@@ -12,12 +13,13 @@ import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Component(immediate = true, service = PublisherService.class)
+@Component(service = PublisherService.class)
 public class EventPublisher implements PublisherService {
-
     private final Logger log = LoggerFactory.getLogger(getClass());
     private final ProviderId providerId = new ProviderId("vr", "org.onosproject.hierarchical-sync-master");
     private DeviceProviderService deviceProviderService;
@@ -115,12 +117,7 @@ public class EventPublisher implements PublisherService {
 
         @Override
         public boolean isReachable(DeviceId deviceId) {
-            return true;
-        }
-
-        @Override
-        public boolean isAvailable(DeviceId deviceId) {
-            return true;
+            return GrpcStorageManager.topicLeader;
         }
 
         @Override

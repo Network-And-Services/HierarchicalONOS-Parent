@@ -42,7 +42,7 @@ public class LinkEventWrapper extends EventWrapper {
             linkNotificationProto = LinkNotificationProto.parseFrom(event.subject());
             String myeventTypeName = linkNotificationProto.getLinkEventType().name();
             if (linkEventTypeSupported(myeventTypeName)){
-                log.info("Received Update --> Type: " + myeventTypeName
+                log.debug("Received Update --> Type: " + myeventTypeName
                         + " Link: " + linkNotificationProto.getLink());
                 eventTypeName = myeventTypeName;
                 description = getLinkDescriptionFromProto(linkNotificationProto.getLink());
