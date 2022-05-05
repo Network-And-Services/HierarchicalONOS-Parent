@@ -3,7 +3,6 @@ package org.onosproject.hierarchicalsyncmaster.impl;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
-import org.onosproject.mastership.MastershipAdminService;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
 import org.onosproject.net.PortNumber;
@@ -13,8 +12,6 @@ import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,14 +45,6 @@ public class EventPublisher implements PublisherService {
         log.info("Stopped");
     }
 
-    public boolean checkPortsExistence(LinkDescription linkDescription){
-        return (deviceAdminService.getPort(linkDescription.src().deviceId(), linkDescription.src().port()) != null) && (deviceAdminService.getPort(linkDescription.dst()) != null);
-    }
-
-    public boolean checkDeviceExistence(DeviceId deviceId){
-        return deviceAdminService.getDevice(deviceId) != null;
-    }
-
     @Override
     public boolean newDeviceTopologyEvent(EventWrapper deviceEventWrapper) {
         DeviceEventWrapper device = (DeviceEventWrapper) deviceEventWrapper;
@@ -79,7 +68,6 @@ public class EventPublisher implements PublisherService {
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case PORT_ADDED:
                 case PORT_UPDATED:
-                    //if (!checkDeviceExistence(device.deviceId)){ return false;}
                     deviceProviderService.portStatusChanged(device.deviceId,descriptor);
                     break;
                 case PORT_REMOVED:
@@ -96,7 +84,6 @@ public class EventPublisher implements PublisherService {
         switch(LinkEvent.Type.valueOf(deviceEventWrapper.eventTypeName)) {
             case LINK_ADDED:
             case LINK_UPDATED:
-                //if(!checkPortsExistence(descriptor)){ return false;}
                 linkProviderService.linkDetected(descriptor);
                 break;
             case LINK_REMOVED:

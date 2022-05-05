@@ -1,6 +1,5 @@
 package org.onosproject.hierarchicalsyncmaster.converter;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.onlab.packet.ChassisId;
 import org.onosproject.grpc.net.device.models.DeviceEnumsProto;
 import org.onosproject.grpc.net.device.models.DeviceEventProto;

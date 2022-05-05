@@ -26,28 +26,20 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import static org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent.Type.*;
 
-/**
- * Implementation of Event Conversion Service.
- *
- */
 @Component(immediate = true, service = EventConversionService.class)
 public class EventConversionManager implements EventConversionService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-
     @Activate
     protected void activate() {
         log.info("Started!");
     }
-
     @Deactivate
     protected void deactivate() {
         log.info("Stopped");
     }
-
     @Override
     public EventWrapper convertEvent(OnosEvent onosEvent) {
         if (onosEvent.type().equals(DEVICE)) {

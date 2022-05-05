@@ -11,7 +11,6 @@ import java.io.IOException;
 
 @Component(service = {GrpcServerService.class})
 public class GrpcServerWorker implements GrpcServerService {
-
     private final Logger log = LoggerFactory.getLogger(getClass());
     private Server server;
     private HierarchicalServiceGrpc.HierarchicalServiceImplBase implBase;

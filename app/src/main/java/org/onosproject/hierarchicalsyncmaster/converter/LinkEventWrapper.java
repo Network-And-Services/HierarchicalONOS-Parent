@@ -15,7 +15,6 @@
  */
 package org.onosproject.hierarchicalsyncmaster.converter;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.onosproject.grpc.net.link.models.LinkEnumsProto;
 import org.onosproject.grpc.net.link.models.LinkEventProto.LinkNotificationProto;
 import org.onosproject.grpc.net.models.LinkProtoOuterClass.LinkProto;
@@ -27,10 +26,6 @@ import org.onosproject.net.Link;
 import org.onosproject.net.link.DefaultLinkDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-/**
- * Converts for ONOS Link event message to protobuf format.
- */
 public class LinkEventWrapper extends EventWrapper {
 
     private final Logger log = LoggerFactory.getLogger(getClass());

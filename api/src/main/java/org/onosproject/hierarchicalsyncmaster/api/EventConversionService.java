@@ -18,11 +18,6 @@ package org.onosproject.hierarchicalsyncmaster.api;
 
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
-
-/**
- * API for conversion of various ONOS events to Protobuf.
- *
- */
 public interface EventConversionService {
     EventWrapper convertEvent(OnosEvent onosEvent);
 }
