@@ -41,6 +41,7 @@ public class LinkEventWrapper extends EventWrapper {
                         + " Link: " + linkNotificationProto.getLink());
                 eventTypeName = myeventTypeName;
                 description = getLinkDescriptionFromProto(linkNotificationProto.getLink());
+                time = event.time();
             } else {
                 log.error("Unsupported Onos Link Event {}. There is no matching"
                         + "proto Link Event type", myeventTypeName);

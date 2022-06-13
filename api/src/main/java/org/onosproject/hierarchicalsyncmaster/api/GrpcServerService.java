@@ -18,7 +18,7 @@ package org.onosproject.hierarchicalsyncmaster.api;
 import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
 
 public interface GrpcServerService {
-    void start(HierarchicalServiceGrpc.HierarchicalServiceImplBase implBase);
+    void start();
     void stop();
     void restart();
     boolean isRunning();

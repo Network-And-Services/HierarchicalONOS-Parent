@@ -12,6 +12,8 @@ import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -75,6 +77,7 @@ public class EventPublisher implements PublisherService {
                     break;
             }
         }
+        printE2E(deviceEventWrapper.time);
         return true;
     }
 
@@ -137,5 +140,10 @@ public class EventPublisher implements PublisherService {
         public ProviderId id() {
             return ProviderId.NONE;
         }
+    }
+
+    public void printE2E(long time){
+        long now = Instant.now().toEpochMilli();
+        log.error("E2E Latencyyy: "+(now - time));
     }
 }

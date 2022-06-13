@@ -73,9 +73,6 @@ public class GrpcStorageManager implements GrpcEventStorageService {
         queue.registerTaskProcessor(this::sendEvent, 1, eventExecutor);
         log.info("Starting tasker");
     }
-
-
-
     public void stopTasker(){
         queue.stopProcessing();
         log.info("Stopping tasker");
