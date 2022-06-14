@@ -30,7 +30,6 @@ public class DeviceEventWrapper extends EventWrapper {
                         + " Device: " + deviceNotificationProto.getDevice().getDeviceId());
                 eventTypeName = myEventTypeName;
                 deviceId = DeviceId.deviceId(deviceNotificationProto.getDevice().getDeviceId());
-                time = event.time();
                 if (eventTypeName.startsWith("DEVICE")) {
                     description = getDeviceFromProto(deviceNotificationProto.getDevice());
                 } else {

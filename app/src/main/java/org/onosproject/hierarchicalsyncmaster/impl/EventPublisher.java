@@ -77,7 +77,7 @@ public class EventPublisher implements PublisherService {
                     break;
             }
         }
-        printE2E(deviceEventWrapper.time);
+        printE2E();
         return true;
     }
 
@@ -93,6 +93,7 @@ public class EventPublisher implements PublisherService {
                 linkProviderService.linkVanished(descriptor);
                 break;
         }
+        printE2E();
         return true;
     }
 
@@ -142,8 +143,8 @@ public class EventPublisher implements PublisherService {
         }
     }
 
-    public void printE2E(long time){
+    public void printE2E(){
         long now = Instant.now().toEpochMilli();
-        log.error("E2E Latencyyy: "+(now - time));
+        log.error("EVENT Published: "+now);
     }
 }
