@@ -12,6 +12,8 @@ import org.onosproject.net.provider.ProviderId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -75,6 +77,7 @@ public class EventPublisher implements PublisherService {
                     break;
             }
         }
+        printTime();
         return true;
     }
 
@@ -90,6 +93,7 @@ public class EventPublisher implements PublisherService {
                 linkProviderService.linkVanished(descriptor);
                 break;
         }
+        printTime();
         return true;
     }
 
@@ -137,5 +141,10 @@ public class EventPublisher implements PublisherService {
         public ProviderId id() {
             return ProviderId.NONE;
         }
+    }
+
+    public void printTime(){
+        long now = Instant.now().toEpochMilli();
+        log.error("EVENT PUBLISHED: "+now);
     }
 }

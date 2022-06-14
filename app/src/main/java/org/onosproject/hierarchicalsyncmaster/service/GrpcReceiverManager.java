@@ -25,6 +25,8 @@ import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newSingleThreadScheduledExecutor;
 import static org.onlab.util.Tools.groupedThreads;
@@ -65,6 +67,8 @@ public class GrpcReceiverManager implements GrpcReceiverService {
         @Override
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
+            long now = Instant.now().toEpochMilli();
+            log.error("EVENT RECEIVED: "+now);
             log.debug("Received event {} from grpc server", request.getType());
             receive(request);
             Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse("ACK").build();
