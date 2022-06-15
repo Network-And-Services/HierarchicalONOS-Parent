@@ -67,13 +67,17 @@ public class GrpcReceiverManager implements GrpcReceiverService {
         @Override
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
-            long now = Instant.now().toEpochMilli();
-            log.error("EVENT RECEIVED: "+now);
-            log.debug("Received event {} from grpc server", request.getType());
+            printTime();
             receive(request);
+            log.debug("Received event {} from grpc server", request.getType());
             Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse("ACK").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
+    }
+
+    public void printTime(){
+        long now = Instant.now().toEpochMilli();
+        log.error("EVENTRECEIVED: "+now);
     }
 }
