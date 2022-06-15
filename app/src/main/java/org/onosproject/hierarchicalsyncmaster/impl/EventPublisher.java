@@ -145,6 +145,6 @@ public class EventPublisher implements PublisherService {
 
     public void printE2E(){
         long now = Instant.now().toEpochMilli();
-        log.error("EVENT Published: "+now);
+        log.error("EVENTPUBLISHED: "+now);
     }
 }
