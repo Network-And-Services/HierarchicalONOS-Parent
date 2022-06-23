@@ -4,6 +4,7 @@ import org.onlab.util.ItemNotFoundException;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
+import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
 import org.onosproject.net.PortNumber;
@@ -31,11 +32,13 @@ public class EventPublisher implements PublisherService {
     private final LinkProvider linkProvider = new LinkLocalProvider();
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceProviderRegistry deviceProviderRegistry;
-
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected RegionAdminService regionAdminService;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceAdminService deviceAdminService;
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected DeviceService deviceService;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected LinkProviderRegistry linkProviderRegistry;
 
@@ -48,6 +51,15 @@ public class EventPublisher implements PublisherService {
 
     @Deactivate
     protected void deactivate() {
+        if(GrpcStorageManager.topicLeader){
+            for(Device device: deviceService.getDevices()){
+                linkProviderService.linksVanished(device.id());
+                deviceAdminService.removeDevice(device.id());
+            }
+            for (Region region : regionAdminService.getRegions()){
+                regionAdminService.removeRegion(region.id());
+            }
+        }
         deviceProviderRegistry.unregister(deviceProvider);
         linkProviderRegistry.unregister(linkProvider);
         log.info("Stopped");
@@ -116,7 +128,7 @@ public class EventPublisher implements PublisherService {
         return true;
     }
 
-    private class DeviceLocalProvider implements DeviceProvider{
+    private class DeviceLocalProvider implements DeviceProvider {
         @Override
         public void triggerProbe(DeviceId deviceId) {
         }
