@@ -1,5 +1,6 @@
 package org.onosproject.hierarchicalsyncmaster.impl;
 
+import org.onlab.util.ItemNotFoundException;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
@@ -9,11 +10,14 @@ import org.onosproject.net.PortNumber;
 import org.onosproject.net.device.*;
 import org.onosproject.net.link.*;
 import org.onosproject.net.provider.ProviderId;
+import org.onosproject.net.region.Region;
+import org.onosproject.net.region.RegionAdminService;
+import org.onosproject.net.region.RegionId;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -28,6 +32,8 @@ public class EventPublisher implements PublisherService {
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceProviderRegistry deviceProviderRegistry;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY)
+    protected RegionAdminService regionAdminService;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceAdminService deviceAdminService;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
@@ -47,10 +53,23 @@ public class EventPublisher implements PublisherService {
         log.info("Stopped");
     }
 
+    public void checkRegion(String clusterid, DeviceId deviceid){
+        if (regionAdminService.getRegionForDevice(deviceid)  == null) {
+            Region region = null;
+            try {
+                region = regionAdminService.getRegion(RegionId.regionId(clusterid));
+            } catch (ItemNotFoundException e) {
+                region = regionAdminService.createRegion(RegionId.regionId(clusterid), clusterid, Region.Type.LOGICAL_GROUP, null);
+            }
+            regionAdminService.addDevices(region.id(), Collections.singleton(deviceid));
+        }
+    }
+
     @Override
     public boolean newDeviceTopologyEvent(EventWrapper deviceEventWrapper) {
         DeviceEventWrapper device = (DeviceEventWrapper) deviceEventWrapper;
         if(device.description instanceof DeviceDescription){
+            checkRegion(device.clusterid, device.deviceId);
             DeviceDescription descriptor = (DeviceDescription) device.description;
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case DEVICE_ADDED:
@@ -61,7 +80,7 @@ public class EventPublisher implements PublisherService {
                 case DEVICE_REMOVED:
                     deviceAdminService.removeDevice(device.deviceId);
                     //TODO: we should not vanish the link for the optical part
-                    linkProviderService.linksVanished(device.deviceId);
+                    //linkProviderService.linksVanished(device.deviceId);
                     break;
             }
         } else{
@@ -104,6 +123,7 @@ public class EventPublisher implements PublisherService {
 
         @Override
         public void roleChanged(DeviceId deviceId, MastershipRole newRole) {
+            deviceProviderService.receivedRoleReply(deviceId, newRole, newRole);
         }
 
         @Override
@@ -113,7 +133,6 @@ public class EventPublisher implements PublisherService {
 
         @Override
         public void changePortState(DeviceId deviceId, PortNumber portNumber, boolean enable) {
-
         }
 
         @Override

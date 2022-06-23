@@ -20,11 +20,14 @@ public class DeviceEventWrapper extends EventWrapper {
     public DeviceId deviceId;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    public String clusterid;
+
     public DeviceEventWrapper(OnosEvent event) {
         DeviceEventProto.DeviceNotificationProto deviceNotificationProto;
         try {
             deviceNotificationProto = DeviceEventProto.DeviceNotificationProto.parseFrom(event.subject());
             String myEventTypeName = deviceNotificationProto.getDeviceEventType().name();
+            clusterid = event.clusterid;
             if (deviceEventTypeSupported(myEventTypeName)) {
                 log.debug("Received Update --> Type: " + deviceNotificationProto.getDeviceEventType()
                         + " Device: " + deviceNotificationProto.getDevice().getDeviceId());

@@ -30,8 +30,11 @@ public class OnosEvent extends AbstractEvent<OnosEvent.Type, byte[]> {
      * @param type The Type of Onos Event
      * @param subject Protobuf message corresponding to the Onos Event
      */
-    public OnosEvent(Type type, byte[] subject) {
+
+    public String clusterid;
+    public OnosEvent(Type type, byte[] subject, String clusterid) {
         super(type, subject);
+        this.clusterid = clusterid;
     }
 
     /**
