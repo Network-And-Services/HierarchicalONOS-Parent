@@ -57,7 +57,8 @@ public class EventPublisher implements PublisherService {
                 deviceAdminService.removeDevice(device.id());
             }
             for (Region region : regionAdminService.getRegions()){
-                regionAdminService.removeRegion(region.id());
+                    regionAdminService.removeDevices(region.id(), regionAdminService.getRegionDevices(region.id()));
+                    regionAdminService.removeRegion(region.id());
             }
         }
         deviceProviderRegistry.unregister(deviceProvider);
@@ -81,12 +82,12 @@ public class EventPublisher implements PublisherService {
     public boolean newDeviceTopologyEvent(EventWrapper deviceEventWrapper) {
         DeviceEventWrapper device = (DeviceEventWrapper) deviceEventWrapper;
         if(device.description instanceof DeviceDescription){
-            checkRegion(device.clusterid, device.deviceId);
             DeviceDescription descriptor = (DeviceDescription) device.description;
             switch(DeviceEvent.Type.valueOf(device.eventTypeName)) {
                 case DEVICE_ADDED:
                 case DEVICE_UPDATED:
                 case DEVICE_AVAILABILITY_CHANGED:
+                    checkRegion(device.clusterid, device.deviceId);
                     deviceProviderService.deviceConnected(device.deviceId,descriptor);
                     break;
                 case DEVICE_REMOVED:

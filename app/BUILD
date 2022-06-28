@@ -1,4 +1,4 @@
-COMPILE_DEPS = CORE_DEPS + [
+COMPILE_DEPS = CORE_DEPS + JACKSON + [
     "@io_grpc_grpc_java//api",
     "@io_grpc_grpc_java//netty",
     "@io_grpc_grpc_java//stub",
