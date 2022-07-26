@@ -175,7 +175,7 @@ public class AppUiTopovMessageHandler extends UiMessageHandler {
             linkMap.add(link);
         }
         for (DemoLink dlink : linkMap.biLinks()) {
-            if (regionService.getRegionForDevice(dlink.one().src().deviceId()) != regionService.getRegionForDevice(dlink.one().dst().deviceId())){
+            if (!regionService.getRegionForDevice(dlink.one().src().deviceId()).equals(regionService.getRegionForDevice(dlink.one().dst().deviceId()))){
                 dlink.makeImportant();
             }
             highlights.add(dlink.highlight(null));
