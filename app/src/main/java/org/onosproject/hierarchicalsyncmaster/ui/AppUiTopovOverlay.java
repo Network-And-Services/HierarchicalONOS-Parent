@@ -66,7 +66,10 @@ public class AppUiTopovOverlay extends UiTopoOverlay {
     @Override
     public void modifyDeviceDetails(PropertyPanel pp, DeviceId deviceId) {
         pp.title(AppUiTopovMessageHandler.deviceService.getDevice(deviceId).annotations().value("originalId"));
-        pp.addProp("CHILDCLUSTER", "Child cluster", AppUiTopovMessageHandler.regionService.getRegionForDevice(deviceId).name());
+        Region region = AppUiTopovMessageHandler.regionService.getRegionForDevice(deviceId);
+        if (region !=null){
+            pp.addProp("CHILDCLUSTER", "Child cluster", AppUiTopovMessageHandler.regionService.getRegionForDevice(deviceId).name());
+        }
         pp.removeProps(LATITUDE, LONGITUDE);
         pp.removeButtons(CoreButtons.SHOW_PORT_VIEW)
                 .removeButtons(CoreButtons.SHOW_GROUP_VIEW)

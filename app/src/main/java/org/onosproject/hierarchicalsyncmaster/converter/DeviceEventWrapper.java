@@ -18,9 +18,8 @@ import java.net.URI;
 public class DeviceEventWrapper extends EventWrapper {
 
     public DeviceId deviceId;
-    private final Logger log = LoggerFactory.getLogger(getClass());
-
     public String clusterid;
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     public DeviceEventWrapper(OnosEvent event) {
         DeviceEventProto.DeviceNotificationProto deviceNotificationProto;
@@ -28,6 +27,9 @@ public class DeviceEventWrapper extends EventWrapper {
             deviceNotificationProto = DeviceEventProto.DeviceNotificationProto.parseFrom(event.subject());
             String myEventTypeName = deviceNotificationProto.getDeviceEventType().name();
             clusterid = event.clusterid;
+            generated = event.generated;
+            sent = event.sent;
+            received = event.received;
             if (deviceEventTypeSupported(myEventTypeName)) {
                 log.debug("Received Update --> Type: " + deviceNotificationProto.getDeviceEventType()
                         + " Device: " + deviceNotificationProto.getDevice().getDeviceId());

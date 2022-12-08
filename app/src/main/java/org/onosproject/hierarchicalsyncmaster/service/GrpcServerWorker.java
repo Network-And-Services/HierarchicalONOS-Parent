@@ -57,19 +57,14 @@ public class GrpcServerWorker implements GrpcServerService {
         @Override
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
-            printE2E();
-            OnosEvent event = new OnosEvent(OnosEvent.Type.valueOf(request.getType()), request.getRequest().toByteArray(), request.getClusterid());
+            OnosEvent event = new OnosEvent(OnosEvent.Type.valueOf(request.getType()), request.getRequest().toByteArray(),
+                    request.getClusterid(), request.getCaptured(), request.getSent(), Instant.now().toEpochMilli());
             grpcEventStorageService.publishEvent(event);
             log.debug("Pushed event {} to grpc storage", event);
             Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse("ACK").build();
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
-    }
-
-    public void printE2E(){
-        long now = Instant.now().toEpochMilli();
-        log.error("EVENTRECEIVED: "+now);
     }
 
 }

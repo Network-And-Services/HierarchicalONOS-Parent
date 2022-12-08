@@ -109,14 +109,14 @@ public class EventPublisher implements PublisherService {
                     break;
             }
         }
-        printE2E();
+        printE2E(deviceEventWrapper);
         return true;
     }
 
     @Override
-    public boolean newLinkTopologyEvent(EventWrapper deviceEventWrapper) {
-        LinkDescription descriptor = (LinkDescription) deviceEventWrapper.description;
-        switch(LinkEvent.Type.valueOf(deviceEventWrapper.eventTypeName)) {
+    public boolean newLinkTopologyEvent(EventWrapper linkEventWrapper) {
+        LinkDescription descriptor = (LinkDescription) linkEventWrapper.description;
+        switch(LinkEvent.Type.valueOf(linkEventWrapper.eventTypeName)) {
             case LINK_ADDED:
             case LINK_UPDATED:
                 linkProviderService.linkDetected(descriptor);
@@ -125,7 +125,7 @@ public class EventPublisher implements PublisherService {
                 linkProviderService.linkVanished(descriptor);
                 break;
         }
-        printE2E();
+        printE2E(linkEventWrapper);
         return true;
     }
 
@@ -175,8 +175,8 @@ public class EventPublisher implements PublisherService {
         }
     }
 
-    public void printE2E(){
+    public void printE2E(EventWrapper eventWrapper){
         long now = Instant.now().toEpochMilli();
-        log.error("EVENTPUBLISHED: "+now);
+        log.error("CAPTURED: "+eventWrapper.generated + "; SENT: " +eventWrapper.sent+ "; RECEIVED: "+eventWrapper.received+ "; PUBLISHED: "+now);
     }
 }

@@ -32,9 +32,15 @@ public class OnosEvent extends AbstractEvent<OnosEvent.Type, byte[]> {
      */
 
     public String clusterid;
-    public OnosEvent(Type type, byte[] subject, String clusterid) {
+    public long generated;
+    public long sent;
+    public long received;
+    public OnosEvent(Type type, byte[] subject, String clusterid, long generated, long sent, long received) {
         super(type, subject);
         this.clusterid = clusterid;
+        this.generated = generated;
+        this.sent = sent;
+        this.received = received;
     }
 
     /**

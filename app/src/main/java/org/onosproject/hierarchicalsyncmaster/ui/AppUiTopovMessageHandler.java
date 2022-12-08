@@ -53,7 +53,7 @@ public class AppUiTopovMessageHandler extends UiMessageHandler {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public static DeviceService deviceService;
-    private LinkService linkService;
+    public static LinkService linkService;
     public static RegionService regionService;
     private Mode currentMode = Mode.IDLE;
     private Element elementOfNote;
@@ -175,7 +175,9 @@ public class AppUiTopovMessageHandler extends UiMessageHandler {
             linkMap.add(link);
         }
         for (DemoLink dlink : linkMap.biLinks()) {
-            if (!regionService.getRegionForDevice(dlink.one().src().deviceId()).equals(regionService.getRegionForDevice(dlink.one().dst().deviceId()))){
+            Region source = regionService.getRegionForDevice(dlink.one().src().deviceId());
+            Region destination = regionService.getRegionForDevice(dlink.one().dst().deviceId());
+            if ((source != null && destination != null && !source.name().equals(destination.name()))){
                 dlink.makeImportant();
             }
             highlights.add(dlink.highlight(null));
@@ -205,7 +207,9 @@ public class AppUiTopovMessageHandler extends UiMessageHandler {
         if (elementOfNote != null && elementOfNote instanceof Device) {
             Highlights highlights = new Highlights();
             Region region = regionService.getRegionForDevice(((Device) elementOfNote).id());
-            singleRegionData(region, highlights);
+            if (region != null) {
+                singleRegionData(region, highlights);
+            }
             sendHighlights(highlights);
         }
     }

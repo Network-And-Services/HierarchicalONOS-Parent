@@ -31,9 +31,11 @@ public class LinkEventWrapper extends EventWrapper {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public LinkEventWrapper(OnosEvent event) {
-
         LinkNotificationProto linkNotificationProto;
         try {
+            generated = event.generated;
+            sent = event.sent;
+            received = event.received;
             linkNotificationProto = LinkNotificationProto.parseFrom(event.subject());
             String myeventTypeName = linkNotificationProto.getLinkEventType().name();
             if (linkEventTypeSupported(myeventTypeName)){
