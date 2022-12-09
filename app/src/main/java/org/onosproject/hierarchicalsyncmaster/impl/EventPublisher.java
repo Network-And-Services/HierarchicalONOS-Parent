@@ -177,6 +177,6 @@ public class EventPublisher implements PublisherService {
 
     public void printE2E(EventWrapper eventWrapper){
         long now = Instant.now().toEpochMilli();
-        log.error("CAPTURED: "+eventWrapper.generated + "; SENT: " +eventWrapper.sent+ "; RECEIVED: "+eventWrapper.received+ "; PUBLISHED: "+now);
+        log.error(";"+eventWrapper.generated + ";" +eventWrapper.sent+ ";"+eventWrapper.received+ ";"+now);
     }
 }
