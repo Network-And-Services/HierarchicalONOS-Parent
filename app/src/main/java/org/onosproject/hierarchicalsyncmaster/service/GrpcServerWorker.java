@@ -11,7 +11,6 @@ import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
-import java.time.Instant;
 
 @Component(immediate = true, service = {GrpcServerService.class})
 public class GrpcServerWorker implements GrpcServerService {
@@ -57,7 +56,6 @@ public class GrpcServerWorker implements GrpcServerService {
         @Override
         public void sayHello(Hierarchical.Request request,
                              io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
-            printE2E();
             OnosEvent event = new OnosEvent(OnosEvent.Type.valueOf(request.getType()), request.getRequest().toByteArray(), request.getClusterid());
             grpcEventStorageService.publishEvent(event);
             log.debug("Pushed event {} to grpc storage", event);
@@ -65,11 +63,6 @@ public class GrpcServerWorker implements GrpcServerService {
             responseObserver.onNext(reply);
             responseObserver.onCompleted();
         }
-    }
-
-    public void printE2E(){
-        long now = Instant.now().toEpochMilli();
-        log.error("EVENTRECEIVED: "+now);
     }
 
 }
