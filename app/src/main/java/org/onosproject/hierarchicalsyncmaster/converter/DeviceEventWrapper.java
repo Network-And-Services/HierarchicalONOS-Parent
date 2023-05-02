@@ -20,8 +20,6 @@ public class DeviceEventWrapper extends EventWrapper {
     public DeviceId deviceId;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public String clusterid;
-
     public DeviceEventWrapper(OnosEvent event) {
         DeviceEventProto.DeviceNotificationProto deviceNotificationProto;
         try {

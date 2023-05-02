@@ -40,6 +40,7 @@ public class LinkEventWrapper extends EventWrapper {
                 log.debug("Received Update --> Type: " + myeventTypeName
                         + " Link: " + linkNotificationProto.getLink());
                 eventTypeName = myeventTypeName;
+                clusterid = event.clusterid;
                 description = getLinkDescriptionFromProto(linkNotificationProto.getLink());
             } else {
                 log.error("Unsupported Onos Link Event {}. There is no matching"
