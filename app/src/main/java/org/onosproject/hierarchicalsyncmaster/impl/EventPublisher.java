@@ -4,6 +4,7 @@ import org.onlab.util.ItemNotFoundException;
 import org.onosproject.hierarchicalsyncmaster.api.PublisherService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.EventWrapper;
 import org.onosproject.hierarchicalsyncmaster.converter.DeviceEventWrapper;
+import org.onosproject.hierarchicalsyncmaster.converter.LinkEventWrapper;
 import org.onosproject.net.Device;
 import org.onosproject.net.DeviceId;
 import org.onosproject.net.MastershipRole;
@@ -18,6 +19,7 @@ import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -30,6 +32,8 @@ public class EventPublisher implements PublisherService {
     private LinkProviderService linkProviderService;
     private final DeviceProvider deviceProvider = new DeviceLocalProvider();
     private final LinkProvider linkProvider = new LinkLocalProvider();
+
+    private int[] counters = new int[10];
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
     protected DeviceProviderRegistry deviceProviderRegistry;
     @Reference(cardinality = ReferenceCardinality.MANDATORY)
@@ -51,6 +55,7 @@ public class EventPublisher implements PublisherService {
 
     @Deactivate
     protected void deactivate() {
+        //log.error(Arrays.toString(counters));
         if(GrpcStorageManager.topicLeader){
             for(Device device: deviceService.getDevices()){
                 linkProviderService.linksVanished(device.id());
@@ -96,6 +101,7 @@ public class EventPublisher implements PublisherService {
                     //linkProviderService.linksVanished(device.deviceId);
                     break;
             }
+            //updateCounterDevice(device);
         } else{
             PortDescription descriptor = (PortDescription) device.description;
             List<PortDescription> descPorts = List.of(descriptor);
@@ -108,6 +114,7 @@ public class EventPublisher implements PublisherService {
                     deviceProviderService.deletePort(device.deviceId,descPorts.get(0));
                     break;
             }
+            //updateCounterPorts(device);
         }
         printE2E(deviceEventWrapper);
         return true;
@@ -115,6 +122,7 @@ public class EventPublisher implements PublisherService {
 
     @Override
     public boolean newLinkTopologyEvent(EventWrapper linkEventWrapper) {
+        //LinkEventWrapper link = (LinkEventWrapper) linkEventWrapper;
         LinkDescription descriptor = (LinkDescription) linkEventWrapper.description;
         switch(LinkEvent.Type.valueOf(linkEventWrapper.eventTypeName)) {
             case LINK_ADDED:
@@ -125,6 +133,7 @@ public class EventPublisher implements PublisherService {
                 linkProviderService.linkVanished(descriptor);
                 break;
         }
+        //updateCounterLinks(link);
         printE2E(linkEventWrapper);
         return true;
     }
@@ -179,4 +188,61 @@ public class EventPublisher implements PublisherService {
         long now = Instant.now().toEpochMilli();
         log.error(";"+eventWrapper.generated + ";" +eventWrapper.sent+ ";"+eventWrapper.received+ ";"+now);
     }
+
+/*
+    public void updateCounterDevice(DeviceEventWrapper deviceEvent){
+        switch (DeviceEvent.Type.valueOf(deviceEvent.eventTypeName)){
+            case DEVICE_ADDED:
+                counters[0]+=1;
+                break;
+            case DEVICE_UPDATED:
+                counters[1]+=1;
+                break;
+            case DEVICE_AVAILABILITY_CHANGED:
+                counters[2]+=1;
+                break;
+            case DEVICE_REMOVED:
+                counters[3]+=1;
+                break;
+            default:
+                log.error("EVENTO STRANO: "+deviceEvent.eventTypeName);
+        }
+    }
+
+    public void updateCounterPorts(DeviceEventWrapper deviceEvent){
+        switch (DeviceEvent.Type.valueOf(deviceEvent.eventTypeName)){
+            case PORT_ADDED:
+                counters[4]+=1;
+                break;
+            case PORT_UPDATED:
+                counters[5]+=1;
+                break;
+            case PORT_REMOVED:
+                counters[6]+=1;
+                break;
+            default:
+                log.error("EVENTO STRANO: "+deviceEvent.eventTypeName);
+        }
+    }
+
+    public void updateCounterLinks(LinkEventWrapper linkEvent){
+        switch (LinkEvent.Type.valueOf(linkEvent.eventTypeName)){
+            case LINK_ADDED:
+                counters[7]+=1;
+                break;
+            case LINK_UPDATED:
+                counters[8]+=1;
+                break;
+            case LINK_REMOVED:
+                counters[9]+=1;
+                break;
+            default:
+                log.error("EVENTO STRANO: "+linkEvent.eventTypeName);
+                break;
+        }
+    }
+
+
+
+ */
 }

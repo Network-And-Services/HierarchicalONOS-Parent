@@ -64,7 +64,13 @@ public class GrpcStorageManager implements GrpcEventStorageService {
         queue = storageService.<OnosEvent>getWorkQueue(GRPC_WORK_QUEUE,
                                                        Serializer.using(KryoNamespaces.API,
                                                                         OnosEvent.class,
-                                                                        OnosEvent.Type.class));
+
+        /*                                                                OnosEvent.Type.class));
+        TODO: Tests
+        if (clusterService.getLocalNode().ip().toString().equals("172.16.7.25")) //TODO: Remove this after you finish the tests
+            leadershipService.runForLeadership(contention);
+
+         */
         leadershipService.runForLeadership(contention);
         log.info("Started");
     }
@@ -106,8 +112,15 @@ public class GrpcStorageManager implements GrpcEventStorageService {
                     } else {
                         stopTasker();
                     }
-                    log.info("Leadership changed to: "+  amItheLeader);
+                    //log.error("Leadership changed to: "+  amItheLeader);
+               /*
+               TODO: Tests
+               } else if (!amItheLeader && !clusterService.getLocalNode().ip().toString().equals("172.16.7.25")){ //TODO: Remove this after you finished tests
+
+                    leadershipService.runForLeadership(contention);
+                    //log.error("Not leader, but competing for Publisher");
                 }
+                */
             }
         }
     }

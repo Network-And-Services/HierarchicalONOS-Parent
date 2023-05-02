@@ -18,7 +18,6 @@ import java.net.URI;
 public class DeviceEventWrapper extends EventWrapper {
 
     public DeviceId deviceId;
-    public String clusterid;
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public DeviceEventWrapper(OnosEvent event) {

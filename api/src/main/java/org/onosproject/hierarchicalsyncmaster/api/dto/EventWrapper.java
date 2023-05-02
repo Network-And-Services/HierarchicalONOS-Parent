@@ -4,7 +4,8 @@ import org.onosproject.net.AbstractDescription;
 
 public abstract class EventWrapper {
     public String eventTypeName;
-    
+
+    public String clusterid;
     public long generated;
     public long sent;
     public long received;

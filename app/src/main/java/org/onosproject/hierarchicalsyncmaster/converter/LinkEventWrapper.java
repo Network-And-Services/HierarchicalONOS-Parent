@@ -33,6 +33,7 @@ public class LinkEventWrapper extends EventWrapper {
     public LinkEventWrapper(OnosEvent event) {
         LinkNotificationProto linkNotificationProto;
         try {
+            clusterid = event.clusterid;
             generated = event.generated;
             sent = event.sent;
             received = event.received;
