@@ -15,6 +15,7 @@
  */
 package org.onosproject.hierarchicalsyncmaster.api.dto;
 
+import com.google.protobuf.GeneratedMessageV3;
 import org.onosproject.event.AbstractEvent;
 
 /**

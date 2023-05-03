@@ -15,8 +15,6 @@
  */
 package org.onosproject.hierarchicalsyncmaster.api;
 
-import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
-
 public interface GrpcServerService {
     void start();
     void stop();

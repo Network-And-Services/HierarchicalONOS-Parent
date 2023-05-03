@@ -5,8 +5,8 @@ import io.grpc.netty.NettyServerBuilder;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcEventStorageService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcServerService;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
-import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical;
-import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
+import org.onosproject.hierarchicalsyncworker.proto.Hierarchical;
+import org.onosproject.hierarchicalsyncworker.proto.HierarchicalServiceGrpc;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +54,18 @@ public class GrpcServerWorker implements GrpcServerService {
 
     private class HierarchicalSyncServer extends HierarchicalServiceGrpc.HierarchicalServiceImplBase {
         @Override
-        public void sayHello(Hierarchical.Request request,
-                             io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver) {
-            OnosEvent event = new OnosEvent(OnosEvent.Type.valueOf(request.getType()), request.getRequest().toByteArray(), request.getClusterid());
+        public void sendDeviceUpdate(Hierarchical.DeviceRequest request, io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver){
+            OnosEvent event = new OnosEvent(OnosEvent.Type.DEVICE, request.getRequest().toByteArray(), request.getClusterid());
+            grpcEventStorageService.publishEvent(event);
+            log.debug("Pushed event {} to grpc storage", event);
+            Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse("ACK").build();
+            responseObserver.onNext(reply);
+            responseObserver.onCompleted();
+        }
+
+        @Override
+        public void sendLinkUpdate(Hierarchical.LinkRequest request, io.grpc.stub.StreamObserver<Hierarchical.Response> responseObserver){
+            OnosEvent event = new OnosEvent(OnosEvent.Type.LINK, request.getRequest().toByteArray(), request.getClusterid());
             grpcEventStorageService.publishEvent(event);
             log.debug("Pushed event {} to grpc storage", event);
             Hierarchical.Response reply = Hierarchical.Response.newBuilder().setResponse("ACK").build();
