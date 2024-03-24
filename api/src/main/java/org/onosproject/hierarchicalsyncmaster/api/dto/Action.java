@@ -13,16 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.hierarchicalsyncmaster.api;
+package org.onosproject.hierarchicalsyncmaster.api.dto;
+public class Action {
 
+    public enum ChildType {
+        RAN,
+        TRANSPORT
+    }
+    public String name;
+    public ChildType childType;
 
-import org.onosproject.hierarchicalsyncmaster.api.dto.Action;
+    /**
+     * Creates a new Action.
+     *
+     * @param name name of the object to be performed the action on.
+     * @param childType PType of the child.
+     */
 
-public interface GrpcServerService {
-    void start();
-    void stop();
-    void restart();
-    boolean isRunning();
+    public Action(ChildType childType, String name){
+        this.childType = childType;
+        this.name = name;
+    }
 
-    void sendActionToChild(Action action);
+    /**
+     * List of Event Types supported.
+     */
 }

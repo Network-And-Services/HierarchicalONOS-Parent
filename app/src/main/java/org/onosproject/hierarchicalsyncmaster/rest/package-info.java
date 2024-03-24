@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.hierarchicalsyncmaster.api;
 
-
-import org.onosproject.hierarchicalsyncmaster.api.dto.Action;
-
-public interface GrpcServerService {
-    void start();
-    void stop();
-    void restart();
-    boolean isRunning();
-
-    void sendActionToChild(Action action);
-}
+/**
+ * API definitions for the Application.
+ */
+package org.onosproject.hierarchicalsyncmaster.rest;

@@ -1,12 +1,17 @@
 package org.onosproject.hierarchicalsyncmaster.service;
 
-import io.grpc.Server;
+import io.grpc.ManagedChannel;
+import io.grpc.netty.NettyChannelBuilder;
 import io.grpc.netty.NettyServerBuilder;
+import io.grpc.Server;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcEventStorageService;
 import org.onosproject.hierarchicalsyncmaster.api.GrpcServerService;
+import org.onosproject.hierarchicalsyncmaster.api.dto.Action;
 import org.onosproject.hierarchicalsyncmaster.api.dto.OnosEvent;
-import org.onosproject.hierarchicalsyncworker.proto.Hierarchical;
-import org.onosproject.hierarchicalsyncworker.proto.HierarchicalServiceGrpc;
+import org.onosproject.hierarchicalsyncmaster.proto.ChildServiceGrpc;
+import org.onosproject.hierarchicalsyncmaster.proto.Hierarchical;
+import org.onosproject.hierarchicalsyncmaster.proto.HierarchicalServiceGrpc;
+import org.onosproject.hierarchicalsyncmaster.proto.ChildServiceGrpc.ChildServiceBlockingStub;
 import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +55,30 @@ public class GrpcServerWorker implements GrpcServerService {
     @Override
     public boolean isRunning() {
         return !server.isTerminated() && !server.isShutdown();
+    }
+
+    @Override
+    public void sendActionToChild(Action action) {
+        String target;
+        Hierarchical.ActionTypeProto request;
+        if (action.childType.equals(Action.ChildType.RAN)){
+            target = OsgiPropertyConstants.RAN_CHILD_ADDRESS_DEFAULT;
+            request = Hierarchical.ActionTypeProto.CONFIGURE_RAN;
+        } else {
+            target = OsgiPropertyConstants.TRANSPORT_CHILD_ADDRESS_DEFAULT;
+            request = Hierarchical.ActionTypeProto.CONFIGURE_PON;
+        }
+        try {
+            ManagedChannel channel = NettyChannelBuilder.forTarget(target)
+                .usePlaintext()
+                .build();
+            ChildServiceBlockingStub blockingStub = ChildServiceGrpc.newBlockingStub(channel);
+            Hierarchical.Response response = blockingStub.sendActionRequest(Hierarchical.ActionRequest.newBuilder().
+                    setType(request).setName(action.name).build());
+        } catch (Exception e) {
+            log.error("Unable to send gRPC message", e);
+        }
+        log.debug("Action event {} sent to child", request);
     }
 
     private class HierarchicalSyncServer extends HierarchicalServiceGrpc.HierarchicalServiceImplBase {

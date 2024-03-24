@@ -13,16 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.onosproject.hierarchicalsyncmaster.api;
 
+package org.onosproject.hierarchicalsyncmaster.rest;
 
-import org.onosproject.hierarchicalsyncmaster.api.dto.Action;
+import org.onlab.rest.AbstractWebApplication;
 
-public interface GrpcServerService {
-    void start();
-    void stop();
-    void restart();
-    boolean isRunning();
+import java.util.Set;
 
-    void sendActionToChild(Action action);
+/**
+ * REST API web application.
+ */
+public class HierarchicalWebApplication extends AbstractWebApplication {
+    @Override
+    public Set<Class<?>> getClasses() {
+        return getClasses(HierarchicalWebResource.class);
+    }
 }
